@@ -1,7 +1,7 @@
-# [fts](https://github.com/rtmigo/fts_py)
+# [ftsrank](https://github.com/rtmigo/ftsrank_py)
 
-A minimalistic algorithm for ranking elements that have the maximum number of 
-features that match the features in the query.
+Searching elements that have the maximum number of features that match the 
+features in the query.
 
 An illustrative example: full-text search, where we search for documents that 
 contain words from the query.
@@ -16,13 +16,13 @@ The algorithm takes into account:
 ### pip
 
 ```bash
-pip3 install git+https://github.com/rtmigo/fts_py#egg=fts
+pip3 install git+https://github.com/rtmigo/ftsrank_py#egg=ftsrank
 ```
 
 ### setup.py
 
 ```python3
 install_requires = [
-    "fts@ git+https://github.com/rtmigo/fts_py"
+    "ftsrank@ git+https://github.com/rtmigo/ftsrank_py"
 ]
 ```

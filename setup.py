@@ -12,18 +12,18 @@ def load_module_dict(filename: str) -> dict:
     return module.__dict__
 
 
-name = "fts"
+name = "ftsrank"
 
 setup(
     name=name,
     version='0.0.0',
     author="Artёm IG",
     author_email="ortemeo@gmail.com",
-    url='https://github.com/rtmigo/fts_py#readme',
+    url='https://github.com/rtmigo/ftsrank_py#readme',
 
     python_requires='>=3.7',
     install_requires=[],
-    packages=['fts'],
+    packages=['ftsrank'],
 
 
     description="",
