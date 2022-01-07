@@ -94,6 +94,101 @@ class TestFts(unittest.TestCase):
         self.assertEqual(
             len(db.search(['jabberwocky'])), 0)
 
+    def test_empty_query(self):
+        db = Fts()
+        for doc in [
+            [2, 3],
+            [1, 2, 3],
+            [1, 3, 4, 2]
+        ]:
+            db.add(doc_id=str(doc), words=doc)
+
+        db.search([1]) # no problem
+        with self.assertRaises(ValueError):
+            db.search([])
+
+    def test_nums(self):
+
+        db = Fts()
+        for doc in [
+            [2, 3],
+            [1, 2, 3],
+            [1, 3, 4, 2]
+        ]:
+            db.add(doc_id=str(doc), words=doc)
+
+        # при поиске единицы найдем самую короткую последовательность
+        # с ней
+        r = db.search([1])
+        self.assertEqual(len(r), 2)
+        self.assertEqual(r[0], '[1, 2, 3]', )
+
+        # числа [2, 3] есть в каждой из последовательностей.
+        # Короткие будут первыми
+        q = [2, 3]
+        r = db.search(q)
+        self.assertEqual(len(r), 3)
+        self.assertEqual(r[0], '[2, 3]')
+        self.assertEqual(r[1], '[1, 2, 3]')
+
+        # число 4 в сочетании с 1 есть только в одной последовательности.
+        # Она будет первой
+        q = [4, 1]
+        r = db.search(q)
+        self.assertEqual(len(r), 2)
+        self.assertEqual(r[0], '[1, 3, 4, 2]')
+        self.assertEqual(r[1], '[1, 2, 3]')
+
+    def test_number_of_matched_words(self):
+
+        db = Fts()
+        for doc in [
+            [1, 2, 3],
+            [3, 2, 1],
+            [1, 9, 5], # !
+            [2, 3, 1],
+            [1, 3, 2],
+
+        ]:
+            db.add(doc_id=str(doc), words=doc)
+
+        q = [1, 2, 3, 5]
+
+        r = db.search(q, prioritize_number_of_matched_words=False)
+        # всего два совпадения, но приоритетное слово
+        self.assertEqual(r[0], '[1, 9, 5]')
+
+        # в обычном режиме найдем что-то другое
+        r = db.search(q)
+        self.assertNotEqual(r[0], '[1, 9, 5]')
+
+
+
+        #r = db.search(q, prioritize_number_of_matched_words=False)
+        #self.assertEqual(len(r), 2)
+        #self.assertEqual(r[0], '[1, 3, 4, 2]')
+        #self.assertEqual(r[1], '[1, 2, 3]')
+
+    def test_word_popularity(self):
+
+        db = Fts()
+        for doc in [
+            [1, 2],
+            [1, 3],
+            [7, 5],
+            [1, 4],
+            [9, 8]
+        ]:
+            db.add(doc_id=str(doc), words=doc)
+
+        # не будет ни одного полного совпадения, но первым найдется
+        # совпадение с редкой пятеркой
+
+        q = [1, 5]
+        r = db.search(q)
+        self.assertEqual(len(r), 4)
+        self.assertEqual(r[0], '[7, 5]')
+
     def test_not_unique_id(self):
         fts = Fts()
         fts.add(['a', 'b', 'c'], doc_id='id1')
