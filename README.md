@@ -28,6 +28,8 @@ fts.add(["please", "mister", "postman", "look", "and", "see",
          "in", "your", "bag", "for", "me"],
         doc_id="doc3")
 
+# print IDs of documents in which at least one word of the query occurs, 
+# starting with the most relevant documents
 for doc_id in fts.search(['postman', 'wait']):
     print(doc_id)
 ```
