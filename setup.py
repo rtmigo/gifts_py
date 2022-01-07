@@ -12,18 +12,18 @@ def load_module_dict(filename: str) -> dict:
     return module.__dict__
 
 
-name = "ftsrank"
+name = "gifts"
 
 setup(
     name=name,
     version='0.0.0',
     author="Artёm IG",
     author_email="ortemeo@gmail.com",
-    url='https://github.com/rtmigo/ftsrank_py#readme',
+    url='https://github.com/rtmigo/gifts_py#readme',
 
     python_requires='>=3.7',
     install_requires=[],
-    packages=['ftsrank'],
+    packages=['gifts'],
 
 
     description="",

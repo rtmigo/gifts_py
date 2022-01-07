@@ -4,7 +4,7 @@ import sys
 
 def lint():
     print("Running pylint...")
-    package_dir_path = 'ftsrank'
+    package_dir_path = 'gifts'
     r = subprocess.call([sys.executable, '-m', 'pylint', package_dir_path,
                          '--disable=missing-module-docstring',
                          '--disable=missing-class-docstring',

@@ -1,4 +1,4 @@
-# [ftsrank](https://github.com/rtmigo/ftsrank_py)
+# [gifts](https://github.com/rtmigo/gifts_py)
 
 Searching elements that have the maximum number of features that match the 
 features in the query.
@@ -14,7 +14,7 @@ The algorithm takes into account:
 ## Example
 
 ```python3
-from ftsrank import Fts
+from gifts import Fts
 
 fts = Fts()
 
@@ -36,13 +36,13 @@ for doc_id in fts.search(['postman', 'wait']):
 ### pip
 
 ```bash
-pip3 install git+https://github.com/rtmigo/ftsrank_py#egg=ftsrank
+pip3 install git+https://github.com/rtmigo/gifts_py#egg=gifts
 ```
 
 ### setup.py
 
 ```python3
 install_requires = [
-    "ftsrank@ git+https://github.com/rtmigo/ftsrank_py"
+    "gifts@ git+https://github.com/rtmigo/gifts_py"
 ]
 ```

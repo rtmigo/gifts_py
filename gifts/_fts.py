@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: (c) 2022 Artёm IG <github.com/rtmigo>
+# SPDX-License-Identifier: MIT
+
 import uuid
 from collections import defaultdict, Counter
 from dataclasses import dataclass
@@ -7,7 +10,6 @@ TWord = TypeVar('TWord')
 
 
 class _WeightedDoc(NamedTuple):
-    # doc: Document
     doc_id: str
     """Document id"""
     weight: float
