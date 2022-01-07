@@ -23,7 +23,8 @@ fts.add(["wait", "mister", "postman"],
 fts.add(["oh", "yes", "wait", "a", "minute", "mister", "postman"], 
         doc_id="doc2")
 fts.add(["please", "mister", "postman", "look", "and", "see",
-         "if", "there's", "a", "letter", "in", "your", "bag", "for", "me"],
+         "if", "there's", "a", "letter", 
+         "in", "your", "bag", "for", "me"],
         doc_id="doc3")
 
 for doc_id in fts.search(['postman', 'wait']):
