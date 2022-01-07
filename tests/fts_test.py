@@ -1,4 +1,4 @@
-from fts import Fts
+from ftsrank import Fts
 
 _mr_postman = """
     Oh yes, wait a minute Mister Postman
