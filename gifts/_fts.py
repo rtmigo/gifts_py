@@ -43,8 +43,11 @@ class Fts(Generic[TWord]):
                 _WeightedDoc(doc_id=doc_id, weight=count_in_this_doc / total))
         return doc_id
 
-    def search(self, query: Iterable[TWord]) -> List[str]:
+    def search(self, query: Iterable[TWord],
+               prioritize_number_of_matched_words: bool = True) -> List[str]:
         query_word_to_count = Counter(query)
+        if len(query_word_to_count) <= 0:
+            raise ValueError("Query is empty")
 
         candidates: Dict[str, _Match] = {}
         for word, word_occurrences_in_query in query_word_to_count.items():
@@ -76,8 +79,12 @@ class Fts(Generic[TWord]):
                         / len(docs_with_word))
                 match.words_matched += 1
 
-        def sorting_key(match: _Match):
-            return match.words_matched, match.sum_weight, match.doc_id
+        if prioritize_number_of_matched_words:
+            def sorting_key(match: _Match):
+                return match.words_matched, match.sum_weight, match.doc_id
+        else:
+            def sorting_key(match: _Match):
+                return match.sum_weight, match.doc_id
 
         result = sorted(candidates.values(), key=sorting_key, reverse=True)
         return [r.doc_id for r in result]
