@@ -1,4 +1,7 @@
-from ftsrank import Fts
+# SPDX-FileCopyrightText: (c) 2022 Artёm IG <github.com/rtmigo>
+# SPDX-License-Identifier: MIT
+
+from gifts import Fts
 
 _mr_postman = """
     Oh yes, wait a minute Mister Postman
