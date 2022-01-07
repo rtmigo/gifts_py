@@ -21,7 +21,7 @@ fts = Fts()
 fts.add(["wait", "mister", "postman"], 
         doc_id="doc1")
 fts.add(["oh", "yes", "wait", "a", "minute", "mister", "postman"], 
-         doc_id="doc2")
+        doc_id="doc2")
 fts.add(["please", "mister", "postman", "look", "and", "see",
          "if", "there's", "a", "letter", "in", "your", "bag", "for", "me"],
         doc_id="doc3")
