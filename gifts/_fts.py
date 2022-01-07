@@ -11,14 +11,12 @@ TWord = TypeVar('TWord')
 
 class _WeightedDoc(NamedTuple):
     doc_id: str
-    """Document id"""
     weight: float
 
 
 @dataclass
 class _Match:
     doc_id: str
-    """Document id"""
     sum_weight: float
     words_matched: int
 
@@ -49,7 +47,7 @@ class Fts(Generic[TWord]):
         query_word_to_count = Counter(query)
 
         candidates: Dict[str, _Match] = {}
-        for word, word_occurences_in_query in query_word_to_count.items():
+        for word, word_occurrences_in_query in query_word_to_count.items():
             docs_with_word = self._word_to_docs.get(word) or []
             for weighted_by_word in docs_with_word:
                 # `weighted_by_word` - это часть базы. Мы сейчас возьмем
@@ -74,7 +72,7 @@ class Fts(Generic[TWord]):
                     candidates[weighted_by_word.doc_id] = match
                 match.sum_weight += (
                         weighted_by_word.weight
-                        * word_occurences_in_query
+                        * word_occurrences_in_query
                         / len(docs_with_word))
                 match.words_matched += 1
 
