@@ -21,15 +21,15 @@ fts = Fts()
 
 fts.add(["wait", "mister", "postman"],
         doc_id="doc1")
-fts.add(["oh", "yes", "wait", "a", "minute", "mister", "postman"],
+
+fts.add(["please", "mister", "postman", "look", "and", "see"],
         doc_id="doc2")
-fts.add(["please", "mister", "postman", "look", "and", "see",
-         "if", "there's", "a", "letter",
-         "in", "your", "bag", "for", "me"],
+
+fts.add(["oh", "yes", "wait", "a", "minute", "mister", "postman"],
         doc_id="doc3")
 
 # print IDs of documents in which at least one word of the query occurs, 
-# starting with the most relevant documents
+# starting with the most relevant matches
 for doc_id in fts.search(['postman', 'wait']):
     print(doc_id)
 ```
