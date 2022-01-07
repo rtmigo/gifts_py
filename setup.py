@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 def load_module_dict(filename: str) -> dict:
@@ -16,15 +16,14 @@ name = "gifts"
 
 setup(
     name=name,
-    version='0.0.0',
+    version='0.0.1',
     author="Artёm IG",
     author_email="ortemeo@gmail.com",
     url='https://github.com/rtmigo/gifts_py#readme',
 
-    python_requires='>=3.7',
+    python_requires='>=3.7',  # 3.7 needed for dataclasses
     install_requires=[],
     packages=['gifts'],
-
 
     description="",
 
@@ -39,7 +38,7 @@ setup(
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: MIT License',
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
-        "Operating System :: POSIX",
-        "Operating System :: Microsoft :: Windows",
     ])
