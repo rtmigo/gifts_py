@@ -11,6 +11,25 @@ The algorithm takes into account:
 - the rarity of such words in the database
 - the frequency of occurrence of words in the document
 
+## Example
+
+```python3
+from ftsrank import Fts
+
+fts = Fts()
+
+fts.add(["wait", "mister", "postman"], 
+        doc_id="doc1")
+fts.add(["oh", "yes", "wait", "a", "minute", "mister", "postman"], 
+         doc_id="doc2")
+fts.add(["please", "mister", "postman", "look", "and", "see",
+         "if", "there's", "a", "letter", "in", "your", "bag", "for", "me"],
+        doc_id="doc3")
+
+for doc_id in fts.search(['postman', 'wait']):
+    print(doc_id)
+```
+
 ## Install
 
 ### pip
