@@ -16,7 +16,7 @@ name = "gifts"
 
 setup(
     name=name,
-    version='0.1.0',
+    version='0.2.0',
     author="Artёm IG",
     author_email="ortemeo@gmail.com",
     url='https://github.com/rtmigo/gifts_py#readme',
