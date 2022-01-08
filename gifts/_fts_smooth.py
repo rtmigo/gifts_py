@@ -98,7 +98,7 @@ class _Document(Generic[TWord]):
     # def normalized_term_weight(self, word: TWord) -> float:
 
 
-class Fts(Generic[TWord]):
+class SmoothFts(Generic[TWord]):
     def __init__(self):
         self._id_to_doc: Dict[str, _Document] = {}
         self._word_to_docs: Dict[TWord, List[_Document]] = defaultdict(list)

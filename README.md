@@ -10,21 +10,25 @@ query = ['A', 'B']
 elements = [
     ['N', 'A', 'M'],  # common features: 'A'
     ['C', 'B', 'A'],  # common features: 'A', 'B'  
-    ['X', 'Y']        # no common features
+    ['X', 'Y']  # no common features
 ]
 ```
 
-In this case, the search with return `['C', 'B', 'A']` and `['N', 'A', 
+In this case, the search with return `['C', 'B', 'A']` and `['N', 'A',
 'M']` in that particular order.
+
+A similar results can be achieved with libraries like
+[scikit](https://scikit-learn.org), and it will probably be much more efficient
+for large datasets.
 
 ## Use for full-text search
 
 Finding documents that contain words from the query.
 
 ```python3
-from gifts import Fts
+from gifts import SmoothFts
 
-fts = Fts()
+fts = SmoothFts()
 
 fts.add(["wait", "mister", "postman"],
         doc_id="doc1")
@@ -43,13 +47,13 @@ for doc_id in fts.search(['postman', 'wait']):
 
 ## Use for abstract data mining
 
-In the examples above, the words were literally words as strings. But they 
-can be any objects suitable as `dict` keys.
+In the examples above, the words were literally words as strings. But they can
+be any objects suitable as `dict` keys.
 
 ```python3
-from gifts import Fts
+from gifts import SmoothFts
 
-fts = Fts()
+fts = SmoothFts()
 
 fts.add([3, 1, 4, 1, 5, 9, 2], doc_id="doc1")
 fts.add([6, 5, 3, 5], doc_id="doc2")
@@ -67,17 +71,25 @@ When ranking the results, the algorithm takes into account::
 - the rarity of such words in the database
 - the frequency of occurrence of words in the document
 
-It uses [tf-idf](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) for weighting the
-words
+### SmoothFts
+
+```python3
+from gifts import SmoothFts
+```
+
+It uses logarithmic [tf-idf](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) for
+weighting the words
 and [cosine similarity](https://en.wikipedia.org/wiki/Cosine_similarity)
-for scoring the matches. In other words, the classic search engine approach.
+for scoring the matches.
 
-A similar results can be achieved with libraries like
-[scikit](https://scikit-learn.org), and it will probably be much more efficient
-for large datasets.
+### SimpleFts
 
-The only advantage of the [gifts](https://github.com/rtmigo/gifts_py) package is
-its compactness, pure Python code and no external dependencies.
+```python3
+from gifts import SimpleFts
+```
+
+Minimalistic approach: weigh, multiply, compare. This object is noticeably
+faster than `SmoothFts`.
 
 ## Install
 
