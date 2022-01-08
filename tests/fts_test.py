@@ -89,6 +89,9 @@ class TestFts(unittest.TestCase):
 
         self.assertEqual(
             db.search(['wait', 'postman'])[0],
+            '(Wait)')
+        self.assertEqual(
+            db.search(['wait', 'postman'], prioritize_number_of_words_matched=True)[0],
             "Wait Mister Postman")
 
         self.assertEqual(
@@ -154,12 +157,12 @@ class TestFts(unittest.TestCase):
 
         q = [1, 2, 3, 5]
 
-        r = db.search(q, prioritize_number_of_matched_words=False)
+        r = db.search(q)
         # всего два совпадения, но приоритетное слово
         self.assertEqual(r[0], '[1, 9, 5]')
 
         # в обычном режиме найдем что-то другое
-        r = db.search(q)
+        r = db.search(q, prioritize_number_of_words_matched=True)
         self.assertNotEqual(r[0], '[1, 9, 5]')
 
 
