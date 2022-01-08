@@ -61,18 +61,18 @@ for doc_id in fts.search([5, 3, 7]):
 
 ## Implementation details
 
-The algorithm takes into account:
+When ranking the results, the algorithm takes into account::
 
 - the number of matching words
 - the rarity of such words in the database
 - the frequency of occurrence of words in the document
 
 It uses [tf-idf](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) for weighting the
-features
+words
 and [cosine similarity](https://en.wikipedia.org/wiki/Cosine_similarity)
 for scoring the matches. In other words, the classic search engine approach.
 
-A similar result can be achieved with libraries like
+A similar results can be achieved with libraries like
 [scikit](https://scikit-learn.org), and it will probably be much more efficient
 for large datasets.
 

@@ -3,29 +3,13 @@
 
 import uuid
 from collections import defaultdict, Counter
-from dataclasses import dataclass
 from math import log, sqrt
-from typing import Iterable, List, Optional, TypeVar, Generic, Dict, NamedTuple, \
-    Callable, Collection
+from typing import Iterable, List, Optional, TypeVar, Generic, Dict, Callable, \
+    Collection
 
 from gifts._cosine_similarity import cosine_similarity
 
 TWord = TypeVar('TWord')
-
-
-class _WeightedDoc(NamedTuple):
-    doc_id: str
-    """Document id"""
-    tf: float
-    """Term frequency"""
-
-
-@dataclass
-class _Match:
-    doc_id: str
-    sum_weight: float
-    words_matched: int
-    vector: List[float]
 
 
 def _idf(docs_with_word: int, docs_total: int) -> float:
