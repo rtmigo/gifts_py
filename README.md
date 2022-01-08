@@ -14,10 +14,8 @@ elements = [
 ]
 ```
 
-In this case, the search result will be `['C', 'B', 'A']` and `['N', 'A', 'M']`.
-
-The order of the results is also important: the more relevant ones come earlier,
-and the `['C', 'B', 'A']` is more relevant.
+In this case, the search with return `['C', 'B', 'A']` and `['N', 'A', 
+'M']` in that particular order.
 
 ## Use for full-text search
 
