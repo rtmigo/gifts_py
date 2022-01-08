@@ -44,7 +44,15 @@ class Fts(Generic[TWord]):
         return doc_id
 
     def search(self, query: Iterable[TWord],
-               prioritize_number_of_matched_words: bool = True) -> List[str]:
+               prioritize_number_of_words_matched: bool = False) -> List[str]:
+        """Returns IDs of documents that include at least one word from `query`.
+        More relevant matches will be at the top of the list.
+
+        `prioritize_words_count` determines whether the documents with the most
+        words from the query should always be ranked higher. If `False`, the
+        number of matches may be outweighed by the rarity of matched words
+        or their frequency in the document.
+        """
         query_word_to_count = Counter(query)
         if len(query_word_to_count) <= 0:
             raise ValueError("Query is empty")
@@ -79,7 +87,7 @@ class Fts(Generic[TWord]):
                         / len(docs_with_word))
                 match.words_matched += 1
 
-        if prioritize_number_of_matched_words:
+        if prioritize_number_of_words_matched:
             def sorting_key(match: _Match):
                 return match.words_matched, match.sum_weight, match.doc_id
         else:
