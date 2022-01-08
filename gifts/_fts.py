@@ -4,14 +4,20 @@
 import uuid
 from collections import defaultdict, Counter
 from dataclasses import dataclass
-from typing import Iterable, List, Optional, TypeVar, Generic, Dict, NamedTuple
+from math import log, sqrt
+from typing import Iterable, List, Optional, TypeVar, Generic, Dict, NamedTuple, \
+    Callable, Collection
+
+from gifts._cosine_similarity import cosine_similarity
 
 TWord = TypeVar('TWord')
 
 
 class _WeightedDoc(NamedTuple):
     doc_id: str
-    weight: float
+    """Document id"""
+    tf: float
+    """Term frequency"""
 
 
 @dataclass
@@ -19,32 +25,149 @@ class _Match:
     doc_id: str
     sum_weight: float
     words_matched: int
+    vector: List[float]
+
+
+def _idf(docs_with_word: int, docs_total: int) -> float:
+    """Inverse document frequency. Gives lower values for frequently used
+    words.
+
+    Here, the variant of the formula used in SciKit (https://bit.ly/3zEDkMn)
+    is closest to "inverse document frequency smooth" from
+    [Wikipedia](https://en.wikipedia.org/wiki/Tf%E2%80%93idf).
+    """
+    assert docs_with_word <= docs_total
+    return log((docs_total + 1) / (docs_with_word + 1)) + 1
+
+
+def _tf(word_occured_in_doc: int, total_words_in_doc: int) -> float:
+    """Term frequency of a word in certain document.
+
+    See: https://bit.ly/3zEDkMn
+    """
+
+    assert word_occured_in_doc <= total_words_in_doc
+    return word_occured_in_doc / total_words_in_doc
+
+
+class _Document(Generic[TWord]):
+    def __init__(self, doc_id: Optional[str], words: List[TWord]):
+        self.doc_id = doc_id
+        self._words = words
+        counts = Counter(self._words)
+        words_in_doc = len(self._words)
+        assert sum(counts.values()) == len(self._words)
+        self._tf: Dict[TWord, float] = \
+            dict((word, _tf(word_occurrences, words_in_doc))
+                 for (word, word_occurrences)
+                 in counts.items())
+        self._word_to_weight: Optional[Dict[TWord, float]] = None
+        self._weights_version: Optional[int] = None
+
+    @property
+    def unique_words(self) -> Collection[TWord]:
+        return self._tf.keys()
+
+    def weight(self,
+               word: TWord,
+               idf: Callable[[TWord], float],
+               idf_version: int) \
+            -> float:
+        """Returns the normalized weight of `word` in the current document.
+
+        It is a smoothed version of TF-IDF, as used is SciKit-Learn and
+        described at https://bit.ly/3zEDkMn V_norm.
+
+        Basically it is a euclidean norm like:
+            V[i] / sqrt(V[1]**2 + V[2]**2 + ... + V[n]**2)
+        where V[i] is a TF-IDF of term i
+        """
+        # We cannot calculate the weight when creating a document: at that time,
+        # we still do not have statistics on all (other) documents and the
+        # frequency of words in them. And now we have been given information
+        # about the frequency by the `idf` argument.
+        if self._word_to_weight is None or self._weights_version != idf_version:
+            # Either we never calculated the weights, or the word frequency
+            # information has been updated. In any case, the weights must
+            # be recalculated.
+            #
+            # Now we will compute euclidean norm for all words in document.
+            # Numerator will be different for each word, denominator will be
+            # the same for all words. We prefer to compute weights for all
+            # words at once to avoid recomputing denominator
+            unique_words = self._tf.keys()
+            denominator = sqrt(sum(self._tf_idf(w, idf) ** 2
+                                   for w in unique_words))
+            self._word_to_weight = dict(
+                (w, self._tf_idf(w, idf) / denominator)
+                for w in unique_words)
+            self._weights_version = idf_version
+
+        assert self._weights_version == idf_version
+        return self._word_to_weight.get(word, 0)
+
+        # https://stackoverflow.com/a/46812408
+
+    def _tf_idf(self, word: TWord, idf: Callable[[TWord], float]) -> float:
+        return self._tf.get(word, 0) * idf(word)
+
+    # def normalized_term_weight(self, word: TWord) -> float:
 
 
 class Fts(Generic[TWord]):
     def __init__(self):
-        self._word_to_docs: Dict[TWord, List[_WeightedDoc]] = defaultdict(list)
-        self._ids = set()
+        self._id_to_doc: Dict[str, _Document] = {}
+        self._word_to_docs: Dict[TWord, List[_Document]] = defaultdict(list)
 
-    def add(self, words: Iterable[TWord], doc_id: Optional[str] = None) -> str:
+        self._db_version = 0
+        """Updates each time when we add or remove document."""
+
+    @property
+    def words_count(self) -> int:
+        return len(self._word_to_docs)
+
+    @property
+    def documents_count(self) -> int:
+        return len(self._id_to_doc)
+
+    def add(self, words: List[TWord],
+            doc_id: Optional[str] = None) -> _Document:
         """Adds a document to the database and returns its ID."""
         if doc_id is None:
             doc_id = str(uuid.uuid4())
-        if doc_id in self._ids:
+        if doc_id in self._id_to_doc:
             raise ValueError(f"Id '{doc_id}' is not unique")
-        self._ids.add(doc_id)
-        ctr = Counter(words)
-        total = sum(ctr.values())
-        for word, count_in_this_doc in ctr.items():
-            assert count_in_this_doc >= 1
-            assert count_in_this_doc <= total
-            assert doc_id is not None
-            self._word_to_docs[word].append(
-                _WeightedDoc(doc_id=doc_id, weight=count_in_this_doc / total))
-        return doc_id
 
-    def search(self, query: Iterable[TWord],
-               prioritize_number_of_words_matched: bool = False) -> List[str]:
+        self._db_version += 1  # todo test
+
+        document = _Document(doc_id, words)
+        self._id_to_doc[doc_id] = document
+        for word in document.unique_words:
+            self._word_to_docs[word].append(document)
+
+        return document
+
+    def _d(self, word: TWord) -> int:
+        docs_with_word = self._word_to_docs.get(word)
+        if docs_with_word is not None:
+            return len(docs_with_word)
+        return 0
+
+    def _word_to_idf(self, word: TWord) -> float:
+        # docs_with_word = self._word_to_docs.get(word)
+        return _idf(
+            docs_with_word=self._d(word),
+            docs_total=self.documents_count)
+
+    def _docs_containing_any_word_from(self, words: Iterable[TWord]) \
+            -> Collection[_Document]:
+        matched_docs = {}
+        for word in words:
+            for doc in self._word_to_docs.get(word) or []:
+                matched_docs[doc.doc_id] = doc
+        return matched_docs.values()
+
+    def search(self, query: List[TWord]) -> List[str]:
         """Returns IDs of documents that include at least one word from `query`.
         More relevant matches will be at the top of the list.
 
@@ -53,46 +176,30 @@ class Fts(Generic[TWord]):
         number of matches may be outweighed by the rarity of matched words
         or their frequency in the document.
         """
-        query_word_to_count = Counter(query)
-        if len(query_word_to_count) <= 0:
-            raise ValueError("Query is empty")
 
-        candidates: Dict[str, _Match] = {}
-        for word, word_occurrences_in_query in query_word_to_count.items():
-            docs_with_word = self._word_to_docs.get(word) or []
-            for weighted_by_word in docs_with_word:
-                # `weighted_by_word` - это часть базы. Мы сейчас возьмем
-                # сведения из это объекта и оставим его неизменным в базе.
-                # `weighted_by_word` содержит ссылку на документ,
-                # где встретилось слово `word` из запроса, а также весовой
-                # коэффициент 0..1 этого слова относительно конкретного
-                # документа (вес больше, если слово в документе встречалось
-                # чаще)
-                assert 0 < weighted_by_word.weight <= 1
+        if len(query) <= 0:
+            raise ValueError
 
-                # `match` - это объект, используемый только при анализе
-                # данного запроса. Он соответствует отдельному документу.
-                # Перебирая все слова из запроса, мы возвращаемся к одним и
-                # тем же `match`, обновляя их поля
-                match = candidates.get(weighted_by_word.doc_id)
-                if match is None:
-                    match = _Match(
-                        sum_weight=0,
-                        words_matched=0,
-                        doc_id=weighted_by_word.doc_id)
-                    candidates[weighted_by_word.doc_id] = match
-                match.sum_weight += (
-                        weighted_by_word.weight
-                        * word_occurrences_in_query
-                        / len(docs_with_word))
-                match.words_matched += 1
+        query_doc = _Document(doc_id=None, words=query)
 
-        if prioritize_number_of_words_matched:
-            def sorting_key(match: _Match):
-                return match.words_matched, match.sum_weight, match.doc_id
-        else:
-            def sorting_key(match: _Match):
-                return match.sum_weight, match.doc_id
+        def term_to_weight(doc: _Document, word: TWord) -> float:
+            return doc.weight(word, self._word_to_idf, self._db_version)
 
-        result = sorted(candidates.values(), key=sorting_key, reverse=True)
-        return [r.doc_id for r in result]
+        matches = []
+
+        # finding all documents containing at least one word from query
+        for match_doc in self._docs_containing_any_word_from(
+                query_doc.unique_words):
+            # listing all unique words in both query and vector
+            all_words = list(set(match_doc.unique_words) |
+                             set(query_doc.unique_words))
+            query_vector = [term_to_weight(query_doc, w) for w in all_words]
+            doc_vector = [term_to_weight(match_doc, w) for w in all_words]
+            assert len(doc_vector) == len(query_vector)
+            score = cosine_similarity(doc_vector, query_vector)
+
+            assert match_doc.doc_id is not None
+            matches.append((score, match_doc.doc_id))
+
+        matches.sort(reverse=True)
+        return [doc_id for score, doc_id in matches]

@@ -1,18 +1,27 @@
 # [gifts](https://github.com/rtmigo/gifts_py)
 
-Searching elements that have the maximum number of features that match the
-features in the query.
+Searching for elements that have the **common features** with the query.
 
-An illustrative example: full-text search, where we search for documents that
-contain words from the query.
+For example:
 
-The algorithm takes into account:
+```python3
+query = ['A', 'B']
 
-- the number of matching words
-- the rarity of such words in the database
-- the frequency of occurrence of words in the document
+elements = [
+    ['N', 'A', 'M'],  # common features: 'A'
+    ['C', 'B', 'A'],  # common features: 'A', 'B'  
+    ['X', 'Y']        # no common features
+]
+```
 
-## Example
+In this case, the search result will be `['C', 'B', 'A']` and `['N', 'A', 'M']`.
+
+The order of the results is also important: the more relevant ones come earlier,
+and the `['C', 'B', 'A']` is more relevant.
+
+## Use for full-text search
+
+Finding documents that contain words from the query.
 
 ```python3
 from gifts import Fts
@@ -34,9 +43,10 @@ for doc_id in fts.search(['postman', 'wait']):
     print(doc_id)
 ```
 
-In the example above, the words were literally words as strings. But they can 
-be any
-objects suitable as `dict` keys.
+## Use for abstract data mining
+
+In the examples above, the words were literally words as strings. But they 
+can be any objects suitable as `dict` keys.
 
 ```python3
 from gifts import Fts
@@ -50,6 +60,26 @@ fts.add([8, 9, 7, 9, 3, 2], doc_id="doc3")
 for doc_id in fts.search([5, 3, 7]):
     print(doc_id)
 ```
+
+## Implementation details
+
+The algorithm takes into account:
+
+- the number of matching words
+- the rarity of such words in the database
+- the frequency of occurrence of words in the document
+
+It uses [tf-idf](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) for weighting the
+features
+and [cosine similarity](https://en.wikipedia.org/wiki/Cosine_similarity)
+for scoring the matches. In other words, the classic search engine approach.
+
+A similar result can be achieved with libraries like
+[scikit](https://scikit-learn.org), and it will probably be much more efficient
+for large datasets.
+
+The only advantage of the [gifts](https://github.com/rtmigo/gifts_py) package is
+its compactness, pure Python code and no external dependencies.
 
 ## Install
 

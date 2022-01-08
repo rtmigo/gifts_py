@@ -1,8 +1,15 @@
 # SPDX-FileCopyrightText: (c) 2022 Artёm IG <github.com/rtmigo>
 # SPDX-License-Identifier: MIT
 
+import math
+import re
+import unittest
+from typing import List
+
 from gifts import Fts
 
+# "Please Mr. Postman" is a song written by Georgia Dobbins, William Garrett,
+# Freddie Gorman, Brian Holland and Robert Bateman
 _mr_postman = """
     Oh yes, wait a minute Mister Postman
     (Wait)
@@ -44,9 +51,6 @@ _mr_postman = """
     (Mister Postman)
     Mister Postman, look and see
 """
-import re
-import unittest
-from typing import List
 
 
 def _words(text: str) -> List[str]:
@@ -54,14 +58,63 @@ def _words(text: str) -> List[str]:
 
 
 class TestFts(unittest.TestCase):
-    def test(self):
 
+    def test_from_example(self):
+        # comparing internal values in Fts with values
+        # from https://bit.ly/3zEDkMn
+
+        def _reference():
+            # https://bit.ly/3zEDkMn
+            tf_1_problem = 1 / 3
+            tf_1_of = 1 / 3
+            tf_1_evil = 1 / 3
+            D_all = 3
+            d_problem = 2
+            d_of = 1
+            d_evil = 2
+            tf_idf_problem = tf_1_problem * (
+                    math.log((D_all + 1) / (d_problem + 1)) + 1)
+            tf_idf_of = tf_1_of * (math.log((D_all + 1) / (d_of + 1)) + 1)
+            tf_idf_evil = tf_1_evil * (math.log((D_all + 1) / (d_evil + 1)) + 1)
+            print(f"idf_evil: {(math.log((D_all + 1) / (d_evil + 1)) + 1)}")
+            print(f"tf_idf_evil: {tf_idf_evil}")
+
+            denominator = math.sqrt(tf_idf_problem ** 2
+                                    + tf_idf_of ** 2 + tf_idf_evil ** 2)
+            return tf_idf_evil / denominator
+
+        db = Fts()
+        doc1 = db.add(['problem', 'of', 'evil'])
+        db.add(['evil', 'queen'])
+        db.add(['horizon', 'problem'])
+
+        self.assertAlmostEqual(doc1._tf['problem'], 1 / 3)
+        self.assertAlmostEqual(doc1._tf['of'], 1 / 3)
+        self.assertAlmostEqual(doc1._tf['evil'], 1 / 3)
+
+        self.assertAlmostEqual(db.documents_count, 3)  # D_all
+        self.assertAlmostEqual(db._d('problem'), 2)
+        self.assertAlmostEqual(db._d('of'), 1)
+        self.assertAlmostEqual(db._d('evil'), 2)
+
+        self.assertAlmostEqual(db._word_to_idf('evil'), 1.2876820724517808)
+
+        self.assertEqual(
+            doc1._tf_idf('evil', db._word_to_idf),
+            0.42922735748392693)
+
+        self.assertAlmostEqual(_reference(),
+                               0.5178561161676974)
+
+        self.assertAlmostEqual(doc1.weight('evil', db._word_to_idf, 0),
+                               0.5178561161676974)
+
+        pass
+
+    def test(self):
         db = Fts()
         for line in set(_mr_postman.splitlines()):
             db.add(doc_id=line.strip(), words=_words(line))
-
-        for lst in db._word_to_docs.values():
-            self.assertEqual(len(lst), len(set(wd.doc_id for wd in lst)))
 
         def docs_containing_word(word):
             return len(db._word_to_docs.get(word, 0))
@@ -87,11 +140,11 @@ class TestFts(unittest.TestCase):
             db.search(['please', 'postman'])[0],
             "(Please, Please Mister Postman)")
 
+        # self.assertEqual(
+        #     db.search(['wait', 'postman'])[0],
+        #     '(Wait)')
         self.assertEqual(
             db.search(['wait', 'postman'])[0],
-            '(Wait)')
-        self.assertEqual(
-            db.search(['wait', 'postman'], prioritize_number_of_words_matched=True)[0],
             "Wait Mister Postman")
 
         self.assertEqual(
@@ -106,7 +159,7 @@ class TestFts(unittest.TestCase):
         ]:
             db.add(doc_id=str(doc), words=doc)
 
-        db.search([1]) # no problem
+        db.search([1])  # no problem
         with self.assertRaises(ValueError):
             db.search([])
 
@@ -148,7 +201,7 @@ class TestFts(unittest.TestCase):
         for doc in [
             [1, 2, 3],
             [3, 2, 1],
-            [1, 9, 5], # !
+            [2, 3, 5],  # !
             [2, 3, 1],
             [1, 3, 2],
 
@@ -157,20 +210,15 @@ class TestFts(unittest.TestCase):
 
         q = [1, 2, 3, 5]
 
+        self.assertGreater(
+            db._word_to_idf(5),
+            db._word_to_idf(1),
+        )
+
         r = db.search(q)
         # всего два совпадения, но приоритетное слово
-        self.assertEqual(r[0], '[1, 9, 5]')
+        self.assertEqual(r[0], '[2, 3, 5]')
 
-        # в обычном режиме найдем что-то другое
-        r = db.search(q, prioritize_number_of_words_matched=True)
-        self.assertNotEqual(r[0], '[1, 9, 5]')
-
-
-
-        #r = db.search(q, prioritize_number_of_matched_words=False)
-        #self.assertEqual(len(r), 2)
-        #self.assertEqual(r[0], '[1, 3, 4, 2]')
-        #self.assertEqual(r[1], '[1, 2, 3]')
 
     def test_word_popularity(self):
 

@@ -16,7 +16,7 @@ name = "gifts"
 
 setup(
     name=name,
-    version='0.0.2',
+    version='0.1.0',
     author="Artёm IG",
     author_email="ortemeo@gmail.com",
     url='https://github.com/rtmigo/gifts_py#readme',
@@ -35,7 +35,7 @@ setup(
     license='MIT',
 
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 2 - Pre-Alpha',
         'License :: OSI Approved :: MIT License',
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
