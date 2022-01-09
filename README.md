@@ -1,8 +1,6 @@
 # [gifts](https://github.com/rtmigo/gifts_py)
 
-Searching for elements that have the **common features** with the query.
-
-For example:
+Searching for elements that have the common features with the query.
 
 ```python3
 query = ['A', 'B']
@@ -106,5 +104,6 @@ install_requires = [
 ## See also
 
 The [skifts](https://github.com/rtmigo/skifts_py#readme) package 
-implements the same algorithm, but uses [scikit-learn](https://scikit-learn.org) 
-for better performance. It is literally hundreds of times faster.
+does the same search, but uses [scikit-learn](https://scikit-learn.org) and 
+[numpy](https://numpy.org/) for better performance. It is literally hundreds 
+of times faster.
