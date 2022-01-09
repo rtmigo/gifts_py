@@ -172,7 +172,7 @@ class _Wrapper:
 
         def test_word_popularity(self):
 
-            db = SmoothFts()
+            db = self.createFts()
             for doc in [
                 [1, 2],
                 [1, 3],
@@ -197,7 +197,7 @@ class _Wrapper:
                 fts.add(['d', 'e', 'f'], doc_id='id1')
 
         def test_not_passing_id(self):
-            fts = SmoothFts()
+            fts = self.createFts()
             ids = set()
             ids.add(fts.add(['a', 'b', 'c']))
             ids.add(fts.add(['d', 'e']))
