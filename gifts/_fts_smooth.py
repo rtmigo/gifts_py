@@ -1,6 +1,10 @@
 # SPDX-FileCopyrightText: (c) 2022 Artёm IG <github.com/rtmigo>
 # SPDX-License-Identifier: MIT
 
+# Nice articles:
+# * https://towardsdatascience.com/measure-text-weight-using-tf-idf-in-python-plain-code-and-scikit-learn-50cb1e4375ad
+# * https://towardsdatascience.com/tf-idf-for-document-ranking-from-scratch-in-python-on-real-world-dataset-796d339a4089
+
 import uuid
 from collections import defaultdict, Counter
 from math import log, sqrt
@@ -180,7 +184,10 @@ class SmoothFts(Generic[TWord]):
             query_vector = [term_to_weight(query_doc, w) for w in all_words]
             doc_vector = [term_to_weight(match_doc, w) for w in all_words]
             assert len(doc_vector) == len(query_vector)
+
             score = cosine_similarity(doc_vector, query_vector)
+            # todo optimize
+            #
 
             assert match_doc.doc_id is not None
             matches.append((score, match_doc.doc_id))

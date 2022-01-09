@@ -17,10 +17,6 @@ elements = [
 In this case, the search with return `['C', 'B', 'A']` and `['N', 'A',
 'M']` in that particular order.
 
-A similar results can be achieved with libraries like
-[scikit](https://scikit-learn.org), and it will probably be much more efficient
-for large datasets.
-
 ## Use for full-text search
 
 Finding documents that contain words from the query.
@@ -106,3 +102,9 @@ install_requires = [
     "gifts@ git+https://github.com/rtmigo/gifts_py"
 ]
 ```
+
+## See also
+
+The [skifts](https://github.com/rtmigo/skifts_py#readme) package 
+implements the same algorithm, but uses [scikit-learn](https://scikit-learn.org) 
+for better performance.
