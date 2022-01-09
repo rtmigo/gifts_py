@@ -5,7 +5,7 @@
 #
 # But we do not want heavy dependencies like numpy or any can of
 # platform-dependent native code.
-from collections import Iterable, Collection
+from typing import Iterable, Collection
 
 
 def _dot(vector_a: Collection[float], vector_b: Collection[float]) -> float:
