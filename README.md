@@ -107,4 +107,4 @@ install_requires = [
 
 The [skifts](https://github.com/rtmigo/skifts_py#readme) package 
 implements the same algorithm, but uses [scikit-learn](https://scikit-learn.org) 
-for better performance.
+for better performance. It is literally hundreds of times faster.
